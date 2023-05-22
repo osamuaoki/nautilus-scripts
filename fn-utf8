@@ -1,0 +1,21 @@
+#!/bin/sh
+# Rename file in UTF-8
+TIME="$(date -u --iso=sec)"
+if [ "$NAUTILUS_SCRIPT_CURRENT_URI" != "${NAUTILUS_SCRIPT_CURRENT_URI#file://}" ]; then
+  echo "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS" | {
+    while true; do
+      read FILE_SJIS
+      if [ -z "$FILE_SJIS" ]; then
+        break
+      fi
+      FILE_UTF8="$(echo "$FILE_SJIS" | iconv -f sjis -t utf-8)"
+      if [ "$FILE_SJIS" != "$FILE_UTF8" ]; then
+        if [ -e "$FILE_UTF8" ]; then
+          # if pre-exists, backup
+          mv -f "$FILE_UTF8" "${FILE_UTF8}.$TIME.orig"
+        fi
+        mv "$FILE_SJIS" "$FILE_UTF8"
+      fi
+    done
+  }
+fi

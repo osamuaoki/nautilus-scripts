@@ -1,0 +1,34 @@
+#!/bin/sh
+#
+# See execution log with `journalctl -f`
+#
+__exec() {
+  systemd-cat -p 3 -t "${0##*/}" "$@"
+}
+TIME="$(date -u --iso=sec)"
+if [ "$NAUTILUS_SCRIPT_CURRENT_URI" = "${NAUTILUS_SCRIPT_CURRENT_URI#file://}" ]; then
+  # not starting with file://
+  __exec echo "Not local path: '$NAUTILUS_SCRIPT_CURRENT_URI'"
+else
+  echo "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS" | {
+    while true; do
+      read FILE_PATH
+      case "$FILE_PATH" in
+      *.doc | *.wri | *.rtf | *.odt | *.DOC | *.WRI | *.RTF)
+        FILE_OUT="${FILE_PATH%.*}.pdf"
+        if [ -e "$FILE_OUT" ]; then
+          # if pre-exists, backup
+          __exec mv -f "$FILE_OUT" "${FILE_OUT}.${TIME}.orig"
+        fi
+        __exec lowriter --headless --convert-to pdf "$FILE_PATH"
+        ;;
+      "")
+        break
+        ;;
+      *)
+        __exec echo "Unknown file: '$FILE_PATH'"
+        ;;
+      esac
+    done
+  }
+fi

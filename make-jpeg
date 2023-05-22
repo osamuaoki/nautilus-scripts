@@ -1,0 +1,33 @@
+#!/bin/sh
+# Convert from HEIC to JPEG
+# See execution log with `journalctl -f`
+__exec() {
+  systemd-cat -p 3 -t "${0##*/}" "$@"
+}
+TIME="$(date -u --iso=sec)"
+if [ "$NAUTILUS_SCRIPT_CURRENT_URI" = "${NAUTILUS_SCRIPT_CURRENT_URI#file://}" ]; then
+  # not starting with file://
+  __exec echo "Not local path: '$NAUTILUS_SCRIPT_CURRENT_URI'"
+else
+  echo "$NAUTILUS_SCRIPT_SELECTED_FILE_PATHS" | {
+    while true; do
+      read FILE_PATH
+      case "$FILE_PATH" in
+      *.HEIC | *.heic)
+        FILE_OUT="${FILE_PATH%.*}.jpeg"
+        if [ -e "$FILE_OUT" ]; then
+          # if pre-exists, backup
+          __exec mv -f "$FILE_OUT" "${FILE_OUT}.${TIME}.orig"
+        fi
+        __exec heif-convert "$FILE_PATH" "${FILE_OUT}"
+        ;;
+      "")
+        break
+        ;;
+      *)
+        __exec echo "Unknown file: '$FILE_PATH'"
+        ;;
+      esac
+    done
+  }
+fi
