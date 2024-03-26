@@ -1,13 +1,13 @@
 # nautilus scripts
 
-Here are my scripts for `nautilus`.
+Here are my [scripts for nautilus](https://github.com/osamuaoki/nautilus-scripts).
 
 Put these into `~/.local/share/nautilus/scripts/`.
 
 
 ```
 $ cd ~/.local/share/nautilus/scripts
-$ git clone http://osamuaoki.github.com/nautilus-scripts.git ./
+$ git clone https://github.com/osamuaoki/nautilus-scripts.git ./
 ```
 
 Files in this repo are in public domain.
